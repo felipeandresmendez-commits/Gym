@@ -1746,6 +1746,23 @@ function openTech(id){
   $("sh").style.display="flex";cancelAnimationFrame(raf);if((!EP&&G3D_MAP[id])){tech=null;g3dStart(id)}else if(tech)raf=requestAnimationFrame(frame);
   if(ph){let on=false;phI=setInterval(()=>{const i=$("ph1"),l=$("phl");if(!i){clearInterval(phI);return}on=!on;i.style.opacity=on?1:0;l.textContent=on?"Final":"Inicio"},1100)}
 }
+const stemOf=m=>nrm(String(m||"").split(" ")[0]).replace(/s$/,"");
+function swapAlts(i){const ss=act(),cur=ss.items[i].ex,c=EX[cur],sc=stemOf((c.mu||[])[0]),seen=new Set([nrm(c.n)]);ss.items.forEach(q=>{if(EX[q.ex])seen.add(nrm(EX[q.ex].n))});const same=[],other=[];Object.keys(EX).forEach(k=>{if(k===cur)return;const x=EX[k],nm=nrm(x.n);if(seen.has(nm)||x.g!==c.g)return;seen.add(nm);(stemOf((x.mu||[])[0])===sc?same:other).push(k)});const byN=(a,b)=>EX[a].n.localeCompare(EX[b].n,"es");return{same:same.sort(byN),other:other.sort(byN)}}
+function swapWhy(cur,k,same){const a=EX[cur],b=EX[k],ea=exPhoto(cur),eb=exPhoto(k),m0=x=>(x.mu||[])[0]||"";const eq=eb?(ea&&ea.e!==eb.e?eb.e+" en vez de "+ea.e.toLowerCase():eb.e):"";if(same)return"Mismo músculo principal"+(m0(a)!==m0(b)?" · enfoque en "+m0(b).toLowerCase():"")+(eq?" · "+eq:"");return"Cambia el músculo principal: de "+m0(a)+" a "+m0(b)+(eb?" · "+eb.e:"")}
+function openSwap(i){const ss=act();if(!ss||!ss.items[i])return;const it=ss.items[i],c=EX[it.ex],ec=exPhoto(it.ex),A=swapAlts(i);cfgOpen=false;
+  const row=(k,same)=>{const e=exPhoto(k);return'<button class="lib-row" data-a="swpick" data-i="'+i+'" data-e="'+k+'">'+(e?'<img src="'+e.a+'" alt="" loading="lazy">':'<div style="width:92px;height:64px;border-radius:6px;background:var(--rais)"></div>')+'<div><b>'+esc(EX[k].n)+'</b><span>'+esc(swapWhy(it.ex,k,same))+'</span></div></button>'};
+  $("shc").innerHTML='<div class="eh" style="align-items:center"><div class="en">Cambiar ejercicio</div><button class="tc" data-a="close">Cerrar</button></div><div class="note" style="margin:0 0 12px">Ahora: <b>'+esc(c.n)+'</b><br>'+esc((c.mu||[]).slice(0,3).join(" · "))+(ec?" · "+ec.e:"")+'</div>'+
+  (A.same.length?'<div class="en" style="font-size:20px;margin:6px 0 2px">Trabajan lo mismo</div><div class="mut" style="margin-bottom:4px">Mismo músculo principal: '+esc((c.mu||[])[0]||"")+'.</div>'+A.same.map(k=>row(k,true)).join(""):'<div class="mut" style="margin:6px 0">No hay otro ejercicio con el mismo músculo principal.</div>')+
+  (A.other.length?'<div class="en" style="font-size:20px;margin:18px 0 2px">Mismo grupo, otro músculo</div><div class="mut" style="margin-bottom:4px">Siguen siendo de '+esc(c.g)+', pero cambia el músculo principal.</div>'+A.other.map(k=>row(k,false)).join(""):"");
+  tech=null;cancelAnimationFrame(raf);$("sh").style.display="flex";$("shc").scrollTop=0}
+function openSwapConfirm(i,k){const ss=act();if(!ss||!ss.items[i]||!EX[k])return;const cur=ss.items[i].ex,a=EX[cur],b=EX[k],ea=exPhoto(cur),eb=exPhoto(k),pv=mk(k,ss.st),w=pv&&pv.sets&&pv.sets[0]?pv.sets[0].w:0,m0=x=>(x.mu||[])[0]||"—";
+  const ln=(l,x,y)=>'<tr><td class="mut" style="width:34%">'+l+'</td><td>'+(x===y?esc(y):'<span class="mut">'+esc(x)+'</span> → <b>'+esc(y)+'</b>')+'</td></tr>';
+  $("shc").innerHTML='<div class="eh" style="align-items:center"><div class="en">Confirmar cambio</div><button class="tc" data-a="close">Cerrar</button></div>'+(eb?'<div class="ph w"><img src="'+eb.a+'" alt=""><img id="ph1" src="'+eb.b+'" alt=""><span id="phl">Inicio</span></div>':'')+
+  '<div class="note" style="margin:6px 0 10px"><span class="mut">'+esc(a.n)+'</span> → <b>'+esc(b.n)+'</b></div><table>'+ln("Músculo principal",m0(a),m0(b))+ln("Grupo",a.g,b.g)+ln("Equipo",ea?ea.e:"—",eb?eb.e:"—")+'<tr><td class="mut">Series</td><td><b>'+(pv?pv.sets.length:"3")+' × '+rtxt(k,ss.st)+' reps</b></td></tr><tr><td class="mut">Peso sugerido</td><td>'+(w>0?'<b>'+fk(w)+' kg</b>':'<span class="mut">Sin historial: elige tu peso</span>')+'</td></tr></table>'+
+  (eb?'<div class="mut" style="margin:8px 0 0">Principal: '+esc(eb.p.join(", "))+(eb.s.length?" · Secundarios: "+esc(eb.s.join(", ")):"")+'</div>':'')+
+  '<div class="row" style="margin-top:16px"><button class="btn g" data-a="swback" data-i="'+i+'">Volver</button><button class="btn" data-a="swok" data-i="'+i+'" data-e="'+k+'">Cambiar</button></div>';
+  clearInterval(phI);if(eb){let on=false;phI=setInterval(()=>{const im=$("ph1"),l=$("phl");if(!im){clearInterval(phI);return}on=!on;im.style.opacity=on?1:0;l.textContent=on?"Final":"Inicio"},1100)}
+  $("shc").scrollTop=0}
 function closeTech(){cfgOpen=false;if(tourI>=0){tourI=-1;try{localStorage.setItem("gymTour","1")}catch(e){}}tech=null;clearInterval(phI);cancelAnimationFrame(raf);g3dStop();$("sh").style.display="none"}
 
 document.addEventListener("click",e=>{try{clickH(e)}catch(err){toast("Algo falló: "+err.message)}});
@@ -1797,7 +1814,10 @@ function clickH(e){
   else if(a==="editprof"){if(cfgOpen)closeTech();if(S.prof)tp={goals:gl(S.prof).slice(),days:S.prof.days,adv:!!S.prof.adv};ed=true;render()}
   else if(a==="lvl"){tp.adv=b.dataset.k==="1";render()}
   else if(a==="more"){more=true;render()}
-  else if(a==="swap"){const it=ss.items[i],g=EX[it.ex].g,c=Object.keys(EX).filter(k=>EX[k].g===g&&(k===it.ex||!ss.items.some(q=>q.ex===k))),n=c[(c.indexOf(it.ex)+1)%c.length];ss.items[i]=mk(n,ss.st);persist();render()}
+  else if(a==="swap")openSwap(i);
+  else if(a==="swpick")openSwapConfirm(i,b.dataset.e);
+  else if(a==="swback")openSwap(i);
+  else if(a==="swok"){const k=b.dataset.e,ss2=act();if(ss2&&ss2.items[i]&&EX[k]){const old=EX[ss2.items[i].ex].n;ss2.items[i]=mk(k,ss2.st);persist();closeTech();toast("Cambiado: "+old+" → "+EX[k].n);render()}}
   else if(a==="addw"){const v=num($("wi").value);if(v>0){S.delb=S.delb.filter(x=>x!==iso());S.body=S.body.filter(x=>x.d!==iso());S.body.push({d:iso(),w:v});persist();render()}}
   else if(a==="delw"){S.delb.push(b.dataset.d);S.body=S.body.filter(x=>x.d!==b.dataset.d);persist();render()}
   else if(a==="settw"){S.tw=num($("tw").value);persist();render()}
