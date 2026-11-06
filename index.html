@@ -522,8 +522,10 @@ function summary(){
   (m.pr.length?'<div class="card"><div class="en">Récords nuevos</div>'+m.pr.map(x=>'<div style="padding:6px 0;border-top:1px solid var(--bd)">'+x+'</div>').join("")+'</div>':'')+
   '<button class="btn" data-a="sumok">Listo</button>';
 }
+function bkExport(){const f="gym-log-"+iso()+".json",blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});try{const file=new File([blob],f,{type:"application/json"});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Copia de Gym Log"}).catch(()=>{});return}}catch(e){}const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=f;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast("Copia exportada")}
+function bkImport(rd){rd=rd&&rd.data&&Array.isArray(rd.data.sessions)?rd.data:rd;if(!rd||!Array.isArray(rd.sessions))throw new Error("El archivo no es una copia de Gym Log");const n0=S.sessions.length;if((S.mig||0)<(rd.mig||0)){const ids=MIGR.map(m=>m.id);S.cr=S.cr.filter(x=>!ids.includes(x.id));S.mig=rd.mig}mergeRemote(rd);if(rd.prof&&!S.prof)S.prof=rd.prof;if(rd.tw&&!S.tw)S.tw=rd.tw;regCustom();migR();persist();toast("Importado: "+(S.sessions.length-n0)+" entrenamientos nuevos");render()}
 function ajustes(){
-  return'<div class="card" style="margin-top:12px"><div class="en">Ajustes</div><div class="row" style="margin-top:10px"><button class="btn g sm" data-a="editprof">Cambiar objetivo</button>'+(dls?'<button class="btn g sm" data-a="exp">Exportar datos</button>':'')+'</div>'+(S.sessions.length?'<button class="btn g sm" style="margin-top:8px;color:#e5484d" data-a="wipe">'+(cf==="wipe"?"¿Seguro? Toca de nuevo":"Borrar historial de entrenamientos")+'</button>'+(cf==="wipe"?'<div class="mut" style="margin-top:6px">Se borrarán '+S.sessions.length+' entrenamientos. Tu objetivo, peso, medidas y rutinas se mantienen.</div>':''):'')+'<div class="mut" id="ex" style="margin-top:8px">Versión 1-nov · Estado: <span id="sy">'+(syncTxt||"conectando…")+'</span></div><div class="mut" style="margin-top:4px;font-size:11px">Ilustración del mapa muscular: Muscles-simplified.svg (Body-Heatmap-Repo). Exercise data by <a href="https://repdb.co" target="_blank" rel="noopener" style="color:inherit">RepDB (repdb.co)</a>.</div></div>';
+  return'<div class="card" style="margin-top:12px"><div class="en">Ajustes</div><div class="row" style="margin-top:10px"><button class="btn g sm" data-a="editprof">Cambiar objetivo</button>'+(dls?'<button class="btn g sm" data-a="exp">Exportar datos</button>':'')+'</div><div class="row" style="margin-top:8px"><button class="btn g sm" data-a="bkexp">Exportar copia</button><button class="btn g sm" data-a="bkimp">Importar copia</button></div><input type="file" id="bkf" accept=".json,application/json" hidden>'+(S.sessions.length?'<button class="btn g sm" style="margin-top:8px;color:var(--red)" data-a="wipe">'+(cf==="wipe"?"¿Seguro? Toca de nuevo":"Borrar historial de entrenamientos")+'</button>'+(cf==="wipe"?'<div class="mut" style="margin-top:6px">Se borrarán '+S.sessions.length+' entrenamientos. Tu objetivo, peso, medidas y rutinas se mantienen.</div>':''):'')+'<div class="mut" id="ex" style="margin-top:8px">Versión 1-nov · Estado: <span id="sy">'+(syncTxt||"conectando…")+'</span></div><div class="mut" style="margin-top:4px;font-size:11px">Ilustración del mapa muscular: Muscles-simplified.svg (Body-Heatmap-Repo). Exercise data by <a href="https://repdb.co" target="_blank" rel="noopener" style="color:inherit">RepDB (repdb.co)</a>.</div></div>';
 }
 function today(){
   if(ce)return exForm();
@@ -1755,6 +1757,8 @@ function clickH(e){
     S.cardio.push(o);cvf=null;persist();render();toast("Cardio guardado: "+o.min+" min")}
   else if(a==="cvdel"){const id=+b.dataset.k;if(cf==="c"+id){cf=null;S.delc.push(id);S.cardio=S.cardio.filter(x=>x.id!==id);persist();render()}else{cf="c"+id;render()}}
   else if(a==="sumok"){sumv=null;render()}
+  else if(a==="bkexp")bkExport();
+  else if(a==="bkimp"){const f=$("bkf");if(f)f.click()}
   else if(a==="exp"){try{dls.save({filename:"gym-log-"+iso()+".json",data:JSON.stringify(S,null,2)}).then(()=>{$("ex").textContent="Archivo exportado."}).catch(()=>{$("ex").textContent="No se pudo exportar."})}catch(e){}}
   else if(a==="rir"){const it=ss.items[i],q=it.sets[j],v=+b.dataset.k;q.rir=q.rir===v?undefined:v;
     const lo=(rgs(it.ex,ss.st)||[8])[0];
@@ -1812,6 +1816,7 @@ document.addEventListener("change",e=>{
   if(e.target.dataset&&(e.target.dataset.g||e.target.dataset.f)){syncInput(e.target);return}
   if(false){}
   else if(e.target.id==="px"){sel=e.target.value;render()}
+  else if(e.target.id==="bkf"){const fl=e.target.files&&e.target.files[0];if(!fl)return;fl.text().then(t=>bkImport(JSON.parse(t))).catch(er=>toast("No se pudo importar: "+(er.message||"archivo inválido"))).then(()=>{e.target.value=""})}
 });
 window.addEventListener("error",e=>toast("Algo falló: "+(e.message||"error")));
 render();init();
