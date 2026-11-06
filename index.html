@@ -73,15 +73,15 @@ select{text-align:left;padding:0 12px;font:600 17px var(--fb);background:var(--r
 .chip.h{background:var(--tx);color:var(--on);border-color:var(--tx)}
 ::placeholder{color:var(--mut);opacity:1}
 nav{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:10;max-width:536px;margin:0 auto;background:var(--navglass);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);border:1px solid var(--ln2);border-radius:34px;display:flex;align-items:center;padding:6px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-nav button{flex:1;min-width:0;min-height:58px;padding:6px 0 5px;border:0;border-radius:28px;background:none;color:var(--mut);font:700 12px var(--fd);letter-spacing:.04em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:background .25s var(--ease),color .25s}
-nav button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-nav svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-nav button.on{color:var(--tx);background:var(--navon)}
-nav button.ctr{flex:1.15}
-nav button.ctr svg{width:24px;height:24px;padding:11px;box-sizing:content-box;border-radius:50%;background:var(--red);color:#fff;stroke:#fff;margin-top:-18px;box-shadow:0 0 0 5px var(--navglass),0 6px 14px rgba(0,0,0,.35);transition:transform .25s var(--ease)}
-nav button.ctr.on{background:none}
-nav button.ctr.on svg{transform:translateY(-2px) scale(1.06)}
-nav button.ctr span{margin-top:-2px}
+nav button,.mn button{flex:1;min-width:0;min-height:58px;padding:6px 0 5px;border:0;border-radius:28px;background:none;color:var(--mut);font:700 12px var(--fd);letter-spacing:.04em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:background .25s var(--ease),color .25s}
+nav button span,.mn button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav svg,.mn svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav button.on,.mn button.on{color:var(--tx);background:var(--navon)}
+nav button.ctr,.mn button.ctr{flex:1.15}
+nav button.ctr svg,.mn button.ctr svg{width:24px;height:24px;padding:11px;box-sizing:content-box;border-radius:50%;background:var(--red);color:#fff;stroke:#fff;margin-top:-18px;box-shadow:0 0 0 5px var(--navglass),0 6px 14px rgba(0,0,0,.35);transition:transform .25s var(--ease)}
+nav button.ctr.on,.mn button.ctr.on{background:none}
+nav button.ctr.on svg,.mn button.ctr.on svg{transform:translateY(-2px) scale(1.06)}
+nav button.ctr span,.mn button.ctr span{margin-top:-2px}
 #rb{display:none;position:fixed;z-index:15;left:16px;right:16px;bottom:calc(92px + env(safe-area-inset-bottom,0px));max-width:528px;margin:0 auto;background:var(--tx);color:var(--on);border-radius:8px;padding:0 8px 0 16px;height:60px;align-items:center;gap:10px;overflow:hidden;--p:0}
 #rb:before{content:"";position:absolute;left:0;bottom:0;height:4px;width:calc(var(--p)*100%);background:var(--red);transition:width .25s linear}
 #rb .rl{font:700 13px var(--fd);letter-spacing:.14em;text-transform:uppercase;color:var(--onm)}
@@ -158,6 +158,19 @@ svg text{font-family:var(--fb)}
 .tour-p{font:500 18px/1.45 var(--fb);margin:8px 0 18px}
 .tour-d{display:flex;gap:6px;margin:14px 0}.tour-d i{flex:1;height:4px;border-radius:2px;background:var(--bd)}.tour-d i.on{background:var(--tx)}
 .fld{display:flex;gap:8px;margin:6px 0 16px}.fld input{flex:1;text-align:left;padding:0 14px;font:600 18px var(--fb);letter-spacing:0}.fld button{flex:0 0 96px}
+
+.mn{display:flex;align-items:center;background:var(--navglass);border:1px solid var(--ln2);border-radius:34px;padding:6px;margin-top:14px}
+.mn button{pointer-events:none}
+.tour-v{background:var(--rais);border-radius:12px;padding:14px;margin:6px 0 16px;pointer-events:none;overflow:hidden;min-height:150px;display:flex;flex-direction:column;justify-content:center}
+.tour-v .st input{font-size:30px}
+.tour-v .set.cur{margin:0 -14px;padding:0 14px}
+.tour-v .set:last-child{border-bottom:0}
+.tour-v .lib-row:first-child{padding-top:0}
+.rb2{position:relative;background:var(--tx);color:var(--on);border-radius:8px;padding:0 8px 0 16px;height:60px;display:flex;align-items:center;gap:10px;overflow:hidden}
+.rb2:before{content:"";position:absolute;left:0;bottom:0;height:4px;width:45%;background:var(--red)}
+.rb2 .rl{font:700 13px var(--fd);letter-spacing:.14em;text-transform:uppercase;color:var(--onm)}
+.rb2 b{font:800 38px/1 var(--fd);flex:1}
+.rb2 u{text-decoration:none;background:var(--on);color:var(--tx);border-radius:6px;padding:11px 12px;font:700 16px var(--fd);letter-spacing:.06em;text-transform:uppercase}
 </style>
 </head>
 <body>
@@ -555,9 +568,19 @@ function summary(){
   (m.pr.length?'<div class="card"><div class="en">Récords nuevos</div>'+m.pr.map(x=>'<div style="padding:6px 0;border-top:1px solid var(--bd)">'+x+'</div>').join("")+'</div>':'')+
   '<button class="btn" data-a="sumok">Listo</button>';
 }
-const TOUR=[["Bienvenida a Gym Log","Aquí registras tus entrenamientos: qué ejercicios hiciste, con cuánto peso y cuántas repeticiones. Todo se guarda en tu teléfono."],["Elige tu rutina","En Entrenar ves la rutina de hoy. Cámbiala con los botones de arriba y toca Empezar entrenamiento."],["Anota cada serie","Ajusta kg y reps con + y −, o toca el número para escribirlo. Al terminar la serie, toca el check. Si el ejercicio usa discos, verás la barra con los discos de cada lado."],["Descansa con el reloj","Al marcar una serie empieza el descanso, abajo. Puedes sumar 30 segundos o saltarlo. En Técnica ves cómo se hace cada ejercicio."],["Mira tu avance","Calendario muestra los días que entrenaste. Cuerpo guarda tu peso y medidas. Progreso muestra tu fuerza y tus récords."],["Cuida tus datos","Tus datos viven solo en este teléfono. Cada tanto, toca el engranaje y elige Guardar copia de mis datos. Ahí también cambias el color y tu nombre."]];
+const TOUR=[["Así funciona Gym Log","Registras tus entrenamientos: qué ejercicios hiciste, con cuánto peso y cuántas repeticiones. Todo se guarda en tu teléfono."],["Elige tu rutina","En Entrenar ves la rutina de hoy. Cámbiala con los botones de arriba y toca Empezar entrenamiento."],["Anota cada serie","Ajusta kg y reps con + y −, o toca el número para escribirlo. Al terminar la serie, toca el check. Si el ejercicio usa discos, verás la barra con los discos de cada lado."],["Descansa con el reloj","Al marcar una serie empieza el descanso, abajo. Puedes sumar 30 segundos o saltarlo. En Técnica ves cómo se hace cada ejercicio."],["Mira tu avance","Calendario muestra los días que entrenaste y tus métricas. Cuerpo guarda tu peso y medidas. Progreso muestra tu fuerza y tus récords."],["Aprende cada ejercicio","En Ejercicios ves fotos, músculos y pasos de cada uno, sin necesidad de entrenar. Durante la rutina también los ves con el botón Técnica."],["Cuida tus datos","Tus datos viven solo en este teléfono. Cada tanto, toca el engranaje y elige Guardar copia de mis datos. Ahí también cambias el color y tu nombre."]];
+const mkSet=(n,w,r,cls,okc)=>'<div class="set'+(cls?" "+cls:"")+'"><span class="n">'+n+'</span><div class="st"><button tabindex="-1">−</button><input value="'+w+'" readonly tabindex="-1"><button tabindex="-1">+</button></div><div class="st"><button tabindex="-1">−</button><input value="'+r+'" readonly tabindex="-1"><button tabindex="-1">+</button></div><button class="ok'+(okc?" on":"")+'" tabindex="-1">'+CK+'</button></div>';
+function tourVis(i){
+  if(i===0){const nv=(document.querySelector("nav")||{innerHTML:""}).innerHTML.replace(/ id="n\d"/g,"").replace(/ data-a="nav"/g,"").replace(/ data-v="\d"/g,"").replace(/ class="on ctr"/g,' class="ctr on"');return'<div style="display:flex;align-items:center;gap:12px"><img src="icons/icon-192.png" width="56" height="56" alt="" style="border-radius:12px"><div class="en" style="font-size:32px">Gym Log</div></div><div class="mn">'+nv+'</div>'}
+  if(i===1)return'<div class="chips" style="margin:0 0 12px;padding:0"><button class="on">Tren superior</button><button>Tren inferior</button><button>Cuerpo completo</button></div><div class="btn" style="text-align:center;display:grid;place-items:center">Empezar entrenamiento</div>';
+  if(i===2)return'<div class="bar fx" style="margin-top:0"><i class="shaft"></i><i class="coll"></i><i class="pl" style="--i:0;height:58px;background:'+PC[20]+'"></i><i class="pl" style="--i:1;height:48px;background:'+PC[15]+'"></i><i class="pl s" style="--i:2;height:28px;background:'+PC[5]+'"></i></div><div class="bar-t">Por lado: <b>20 + 15 + 5 kg</b></div>'+mkSet(1,60,10,"dn",true)+mkSet(2,62.5,8,"cur",false);
+  if(i===3)return'<div class="rb2"><span class="rl">Descanso</span><b>1:12</b><u>+30 s</u><u>Saltar</u></div>';
+  if(i===4)return'<div class="mt" style="border-top:0;margin:0"><div><b>12</b><span>Entrenamientos</span></div><div><b>3</b><span>Este mes</span></div><div><b>3</b><span>Semanas seguidas</span></div></div><svg viewBox="0 0 300 70" width="100%" style="margin-top:6px" aria-hidden="true"><polyline fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" points="10,58 100,40 190,32 290,12"/><circle cx="10" cy="58" r="4" fill="currentColor"/><circle cx="100" cy="40" r="4" fill="currentColor"/><circle cx="190" cy="32" r="4" fill="currentColor"/><circle cx="290" cy="12" r="6" fill="#E2272B"/></svg>';
+  if(i===5)return'<div class="lib-row"><img src="ex/Barbell_Full_Squat/0.jpg" alt=""><div><b>Sentadilla</b><span>Cuádriceps · Glúteos · Barra</span></div></div><div class="lib-row"><img src="ex/Barbell_Bench_Press_-_Medium_Grip/0.jpg" alt=""><div><b>Press banca</b><span>Pectoral · Tríceps · Barra</span></div></div>';
+  return'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div class="gear" style="margin:0">'+GEAR+'</div><span class="mut">Engranaje, arriba a la derecha</span></div><div class="btn g" style="text-align:center;display:grid;place-items:center">Guardar copia de mis datos</div>'
+}
 let tourI=-1;
-function openTour(i){tourI=i;cfgOpen=false;const t=TOUR[i],last=i===TOUR.length-1;$("shc").innerHTML='<div class="eh" style="align-items:center"><div class="tour-n">Guía · '+(i+1)+' de '+TOUR.length+'</div><button class="tc" data-a="close">Saltar</button></div><div class="tour-d">'+TOUR.map((_,k)=>'<i class="'+(k<=i?"on":"")+'"></i>').join("")+'</div><div class="en" style="font-size:30px">'+t[0]+'</div><div class="tour-p">'+t[1]+'</div><div class="row">'+(i>0?'<button class="btn g" data-a="tp">Atrás</button>':'')+'<button class="btn" data-a="'+(last?"close":"tn")+'">'+(last?"Listo":"Siguiente")+'</button></div>';tech=null;cancelAnimationFrame(raf);$("sh").style.display="flex"}
+function openTour(i){tourI=i;cfgOpen=false;const t=TOUR[i],last=i===TOUR.length-1;$("shc").innerHTML='<div class="eh" style="align-items:center"><div class="tour-n">Guía · '+(i+1)+' de '+TOUR.length+'</div><button class="tc" data-a="close">Saltar</button></div><div class="tour-d">'+TOUR.map((_,k)=>'<i class="'+(k<=i?"on":"")+'"></i>').join("")+'</div><div class="tour-v" aria-hidden="true">'+tourVis(i)+'</div><div class="en" style="font-size:30px">'+t[0]+'</div><div class="tour-p">'+t[1]+'</div><div class="row">'+(i>0?'<button class="btn g" data-a="tp">Atrás</button>':'')+'<button class="btn" data-a="'+(last?"close":"tn")+'">'+(last?"Listo":"Siguiente")+'</button></div>';tech=null;cancelAnimationFrame(raf);$("sh").style.display="flex"}
 const THEMES=[["oscuro","Oscuro","#121212"],["rosado","Rosado","#FDEBF1"],["claro","Claro","#F4F4F0"]];
 function setTheme(k){try{localStorage.setItem("gymTheme",k)}catch(e){}document.documentElement.setAttribute("data-theme",k);const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=(THEMES.find(x=>x[0]===k)||THEMES[0])[2]}
 function curTheme(){return document.documentElement.getAttribute("data-theme")||"oscuro"}
