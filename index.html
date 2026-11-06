@@ -127,6 +127,9 @@ table{width:100%;border-collapse:collapse;font-size:16px}td{padding:10px 2px;bor
 .bar-t{font:700 15px var(--fd);letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:4px}
 .bar-t b{color:var(--tx)}
 svg text{font-family:var(--fb)}
+.th{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.gear{flex:none;width:46px;height:46px;border:0;border-radius:8px;background:none;box-shadow:inset 0 0 0 1.5px #4a4a4a;color:var(--tx);display:grid;place-items:center;margin-top:2px}
+.gear svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -522,8 +525,11 @@ function summary(){
   (m.pr.length?'<div class="card"><div class="en">Récords nuevos</div>'+m.pr.map(x=>'<div style="padding:6px 0;border-top:1px solid var(--bd)">'+x+'</div>').join("")+'</div>':'')+
   '<button class="btn" data-a="sumok">Listo</button>';
 }
+const GEAR='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
+let cfgOpen=false;
+function openCfg(keep){cfgOpen=true;const n=S.sessions.filter(q=>q.fin).length;$("shc").innerHTML='<div class="eh" style="align-items:center"><div class="en">Ajustes</div><button class="tc" data-a="close">Cerrar</button></div><div class="mut" style="margin-bottom:12px">'+(n?n+" entrenamientos guardados en este dispositivo.":"Aún no hay entrenamientos guardados en este dispositivo.")+'</div><button class="btn" data-a="bkimp">Cargar entrenamientos desde archivo</button><div class="mut" style="margin:6px 0 16px">Elige un archivo de copia (.json), por ejemplo desde Archivos. Se une a lo que ya tienes y no borra nada.</div><button class="btn g" data-a="bkexp">Guardar copia de mis datos</button><button class="btn g" style="margin-top:8px" data-a="editprof">Cambiar objetivo</button>'+(S.sessions.length?'<button class="btn g" style="margin-top:8px;color:var(--red)" data-a="wipe">'+(cf==="wipe"?"¿Seguro? Toca de nuevo":"Borrar historial de entrenamientos")+'</button>'+(cf==="wipe"?'<div class="mut" style="margin-top:6px">Se borrarán '+S.sessions.length+' entrenamientos. Tu objetivo, peso, medidas y rutinas se mantienen.</div>':''):'')+'<input type="file" id="bkf" accept=".json,application/json" hidden><div class="mut" id="ex" style="margin-top:14px">Estado: <span id="sy">'+(syncTxt||"Guardado en este dispositivo")+'</span></div><div class="mut" style="margin-top:6px;font-size:12px">Ilustración del mapa muscular: Muscles-simplified.svg (Body-Heatmap-Repo). Exercise data by <a href="https://repdb.co" target="_blank" rel="noopener" style="color:inherit">RepDB (repdb.co)</a>.</div>';if(!keep){tech=null;cancelAnimationFrame(raf)}$("sh").style.display="flex"}
 function bkExport(){const f="gym-log-"+iso()+".json",blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});try{const file=new File([blob],f,{type:"application/json"});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Copia de Gym Log"}).catch(()=>{});return}}catch(e){}const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=f;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast("Copia exportada")}
-function bkImport(rd){rd=rd&&rd.data&&Array.isArray(rd.data.sessions)?rd.data:rd;if(!rd||!Array.isArray(rd.sessions))throw new Error("El archivo no es una copia de Gym Log");const n0=S.sessions.length;if((S.mig||0)<(rd.mig||0)){const ids=MIGR.map(m=>m.id);S.cr=S.cr.filter(x=>!ids.includes(x.id));S.mig=rd.mig}mergeRemote(rd);if(rd.prof&&!S.prof)S.prof=rd.prof;if(rd.tw&&!S.tw)S.tw=rd.tw;regCustom();migR();persist();toast("Importado: "+(S.sessions.length-n0)+" entrenamientos nuevos");render()}
+function bkImport(rd){rd=rd&&rd.data&&Array.isArray(rd.data.sessions)?rd.data:rd;if(!rd||!Array.isArray(rd.sessions))throw new Error("El archivo no es una copia de Gym Log");const n0=S.sessions.length;if((S.mig||0)<(rd.mig||0)){const ids=MIGR.map(m=>m.id);S.cr=S.cr.filter(x=>!ids.includes(x.id));S.mig=rd.mig}mergeRemote(rd);if(rd.prof&&!S.prof)S.prof=rd.prof;if(rd.tw&&!S.tw)S.tw=rd.tw;regCustom();migR();persist();closeTech();toast("Importado: "+(S.sessions.length-n0)+" entrenamientos nuevos");render()}
 function ajustes(){
   return'<div class="card" style="margin-top:12px"><div class="en">Ajustes</div><div class="row" style="margin-top:10px"><button class="btn g sm" data-a="editprof">Cambiar objetivo</button>'+(dls?'<button class="btn g sm" data-a="exp">Exportar datos</button>':'')+'</div><div class="row" style="margin-top:8px"><button class="btn g sm" data-a="bkexp">Exportar copia</button><button class="btn g sm" data-a="bkimp">Importar copia</button></div><input type="file" id="bkf" accept=".json,application/json" hidden>'+(S.sessions.length?'<button class="btn g sm" style="margin-top:8px;color:var(--red)" data-a="wipe">'+(cf==="wipe"?"¿Seguro? Toca de nuevo":"Borrar historial de entrenamientos")+'</button>'+(cf==="wipe"?'<div class="mut" style="margin-top:6px">Se borrarán '+S.sessions.length+' entrenamientos. Tu objetivo, peso, medidas y rutinas se mantienen.</div>':''):'')+'<div class="mut" id="ex" style="margin-top:8px">Versión 1-nov · Estado: <span id="sy">'+(syncTxt||"conectando…")+'</span></div><div class="mut" style="margin-top:4px;font-size:11px">Ilustración del mapa muscular: Muscles-simplified.svg (Body-Heatmap-Repo). Exercise data by <a href="https://repdb.co" target="_blank" rel="noopener" style="color:inherit">RepDB (repdb.co)</a>.</div></div>';
 }
@@ -547,7 +553,7 @@ function today(){
     const note=AW?'<div class="mut" style="margin:-2px 0 10px;line-height:1.4">'+AW.name+' · '+AW.why+(AW.blocked.length?' Ayer trabajaste '+AW.blocked.join(", ").toLowerCase()+': sin compuestos para eso hoy.':"")+'</div>'+(AW.fatigue?'<div class="pu" style="margin:0 0 10px">Día Extra: Volumen ajustado para recuperación</div>':""):SHD?'<div class="warn">Fatiga detectada en '+SHD.names.join(", ")+'. Usa "Adaptativo" o reduce el volumen de hoy.<button class="btn g sm" style="margin-top:8px" data-a="fatadj">'+(fa?"✓ Aplicado: −1 serie en fatigados (toca para deshacer)":"Aplicar -1 serie en fatigados")+'</button></div>':"";
     hero='<div class="card hero"><div class="big" style="margin:4px 0 8px">'+FN[pick]+'</div><div class="chips">'+(keys.includes(pick)?keys:[pick].concat(keys)).map(k=>'<button data-a="pick" data-k="'+k+'" class="'+(pick===k?"on":"")+'">'+(k[0]==="u"?FN[k]:(SH[k]||FN[k]))+'</button>').join("")+'</div>'+note+'<div class="mut" style="margin:-2px 0 10px">Día de '+STN[sty][0].toLowerCase()+' · <button class="lnk" data-a="tsty">'+(showSty?"Listo":"Cambiar")+'</button></div>'+(showSty?'<div class="rts" style="margin:0 0 6px">'+["f","h","m"].map(k=>'<button data-a="sty" data-k="'+k+'" class="'+(sty===k?"on":"")+'">'+STN[k][0]+'</button>').join("")+'</div><div class="mut" style="margin-bottom:10px">'+STN[sty][1]+'</div>':"")+FL(pick).map(id=>'<div style="display:flex;justify-content:space-between;padding:5px 0"><span>'+EX[id].n+(benchFor(id)?' <span class="mut" style="font-size:13px">· '+benchFor(id)[0]+'</span>':'')+'</span><span class="mut">'+nSets(id,sty)+' × '+rtxt(id,sty)+'</span></div>').join("")+'<button class="btn" style="margin-top:12px" data-a="start">Empezar entrenamiento</button></div>';adaptR=null;
     }
-    return tplans+hero+thisWeek()+cardioCard()+coach(ad)+myCard()+ajustes();
+    return tplans+hero+thisWeek()+cardioCard()+coach(ad)+myCard();
   }
   const RC=records(),tot=a.items.reduce((t,i)=>t+i.sets.length,0),dn=a.items.reduce((t,i)=>t+i.sets.filter(q=>q.ok).length,0);
   const curI=a.items.findIndex(it=>it.sets.some(q=>!q.ok));
@@ -938,7 +944,7 @@ async function lock(){try{if(navigator.wakeLock&&!wl&&document.visibilityState==
 function unlock(){try{wl&&wl.release()}catch(e){}wl=null}
 function beep(){try{if(!AUD)return;const o=AUD.createOscillator(),g=AUD.createGain();o.connect(g);g.connect(AUD.destination);o.frequency.value=880;g.gain.setValueAtTime(.25,AUD.currentTime);o.start();o.stop(AUD.currentTime+.3)}catch(e){}}
 try{document.addEventListener("visibilitychange",()=>{if(act())lock();if(document.visibilityState==="visible"&&ref)ref.get().then(sn=>{if(sn&&sn.exists&&mergeRemote(sn.data())){regCustom();render()}}).catch(()=>{})});document.addEventListener("focusin",e=>{const t=e.target;if(t&&t.tagName==="INPUT"&&/^(decimal|numeric)$/.test(t.getAttribute("inputmode")||"")){setTimeout(()=>{try{t.select();t.setSelectionRange(0,String(t.value).length)}catch(_){}},0)}})}catch(e){}
-function render(){const sy=window.scrollY;if(act())lock();const TT=["","Entrenar","Calendario","Cuerpo","Progreso","Equipo"];$("root").innerHTML='<h2 class="lt">'+TT[view]+'</h2>'+(view===1?today():view===2?cal():view===3?body():view===4?progress():team());[1,2,3,4].forEach(i=>$("n"+i).className=view===i?"on":"");{const r=$("root");r.classList.remove("vin");if(animNext){void r.offsetWidth;r.classList.add("vin")}}fxI=null;popK=null;animNext=false;if(sy>0)window.scrollTo(0,sy)}
+function render(){const sy=window.scrollY;if(act())lock();const TT=["","Entrenar","Calendario","Cuerpo","Progreso","Equipo"];$("root").innerHTML='<div class="th"><h2 class="lt">'+TT[view]+'</h2><button class="gear" data-a="cfg" aria-label="Ajustes">'+GEAR+'</button></div>'+(view===1?today():view===2?cal():view===3?body():view===4?progress():team());[1,2,3,4].forEach(i=>$("n"+i).className=view===i?"on":"");{const r=$("root");r.classList.remove("vin");if(animNext){void r.offsetWidth;r.classList.add("vin")}}fxI=null;popK=null;animNext=false;if(cfgOpen)openCfg(true);if(sy>0)window.scrollTo(0,sy)}
 
 let rEnd=0,rI=null,rTot=60;
 function rest(sec){try{AUD=AUD||new(window.AudioContext||window.webkitAudioContext)();AUD.resume&&AUD.resume()}catch(e){}rEnd=Date.now()+sec*1000;rTot=sec;$("rb").style.display="flex";clearInterval(rI);rI=setInterval(tick,250);tick()}
@@ -1664,7 +1670,7 @@ function openTech(id){
   $("sh").style.display="flex";cancelAnimationFrame(raf);if(G3D_MAP[id]){tech=null;g3dStart(id)}else if(tech)raf=requestAnimationFrame(frame);
   if(ph){let on=false;phI=setInterval(()=>{const i=$("ph1"),l=$("phl");if(!i){clearInterval(phI);return}on=!on;i.style.opacity=on?1:0;l.textContent=on?"Final":"Inicio"},1100)}
 }
-function closeTech(){tech=null;clearInterval(phI);cancelAnimationFrame(raf);g3dStop();$("sh").style.display="none"}
+function closeTech(){cfgOpen=false;tech=null;clearInterval(phI);cancelAnimationFrame(raf);g3dStop();$("sh").style.display="none"}
 
 document.addEventListener("click",e=>{try{clickH(e)}catch(err){toast("Algo falló: "+err.message)}});
 function clickH(e){
@@ -1712,7 +1718,7 @@ function clickH(e){
   else if(a==="sty"){psty=b.dataset.k;render()}
   else if(a==="days"){tp.days=+b.dataset.k;render()}
   else if(a==="saveprof"){S.prof={goals:tp.goals.slice(),goal:tp.goals[0],days:tp.days,adv:!!tp.adv};ed=false;pick=null;persist();render()}
-  else if(a==="editprof"){if(S.prof)tp={goals:gl(S.prof).slice(),days:S.prof.days,adv:!!S.prof.adv};ed=true;render()}
+  else if(a==="editprof"){if(cfgOpen)closeTech();if(S.prof)tp={goals:gl(S.prof).slice(),days:S.prof.days,adv:!!S.prof.adv};ed=true;render()}
   else if(a==="lvl"){tp.adv=b.dataset.k==="1";render()}
   else if(a==="more"){more=true;render()}
   else if(a==="swap"){const it=ss.items[i],g=EX[it.ex].g,c=Object.keys(EX).filter(k=>EX[k].g===g&&(k===it.ex||!ss.items.some(q=>q.ex===k))),n=c[(c.indexOf(it.ex)+1)%c.length];ss.items[i]=mk(n,ss.st);persist();render()}
@@ -1757,6 +1763,7 @@ function clickH(e){
     S.cardio.push(o);cvf=null;persist();render();toast("Cardio guardado: "+o.min+" min")}
   else if(a==="cvdel"){const id=+b.dataset.k;if(cf==="c"+id){cf=null;S.delc.push(id);S.cardio=S.cardio.filter(x=>x.id!==id);persist();render()}else{cf="c"+id;render()}}
   else if(a==="sumok"){sumv=null;render()}
+  else if(a==="cfg")openCfg();
   else if(a==="bkexp")bkExport();
   else if(a==="bkimp"){const f=$("bkf");if(f)f.click()}
   else if(a==="exp"){try{dls.save({filename:"gym-log-"+iso()+".json",data:JSON.stringify(S,null,2)}).then(()=>{$("ex").textContent="Archivo exportado."}).catch(()=>{$("ex").textContent="No se pudo exportar."})}catch(e){}}
