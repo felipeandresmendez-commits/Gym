@@ -282,7 +282,7 @@ function regCustom(){
   try{enrichCx()}catch(e){}
   S.cx.forEach(x=>{const fx=fixMu(x.n);EX[x.id]={g:fx?fx.g:x.g,s:(x.s||[]).map(String),n:esc(x.n),mu:(fx?fx.mu:(x.mu&&x.mu.length?x.mu:[x.g])).map(esc),w:x.w,r:x.r,rest:+x.rest||90,cue:(x.cue||[]).map(esc)}});
   Object.keys(FOCUS).filter(k=>k[0]==="u").forEach(k=>{delete FOCUS[k];delete FN[k];delete FS[k];delete SH[k]});
-  S.cr.forEach(r=>{const k="u"+r.id;FOCUS[k]=r.items.filter(i=>EX[i]);FN[k]=esc(r.n);FS[k]=r.items.length+" ejercicios";SH[k]=esc(r.n.replace(/^Lunes\s+/i,"").slice(0,9))});
+  S.cr.forEach(r=>{const k="u"+r.id;FOCUS[k]=r.items.filter(i=>EX[i]);FN[k]=esc(r.n);FS[k]=r.items.filter(i=>EX[i]).length+" ejercicios";SH[k]=esc(r.n.replace(/^Lunes\s+/i,"").slice(0,9))});
 }
 let syncTxt="",crewRef=null,crewCol=null,crew=[],U=null,pnames={},myId=null,ced=null,noteEx=null,moreEx=null,showSty=false;
 function toast(m){const t=$("toast");if(!t)return;t.textContent=m;t.style.display="block";clearTimeout(toast.h);toast.h=setTimeout(()=>{t.style.display="none"},2600)}
@@ -669,7 +669,7 @@ function builder(){
   const gs=GR.map(g=>'<optgroup label="'+g+'">'+Object.keys(EX).filter(k=>EX[k].g===g).map(k=>'<option value="'+k+'">'+EX[k].n+'</option>').join("")+'</optgroup>').join("");
   return'<div class="eh" style="align-items:center"><div class="en">'+(bd.id?"Editar rutina":"Nueva rutina")+'</div><button class="tc" data-a="bcancel">Cancelar</button><button class="tc" style="background:var(--ac);color:#fff;margin-left:6px" data-a="bsave">Guardar</button></div>'+
   '<div class="card"><div class="mut">Nombre</div><input id="rn" value="'+esc(bd.n)+'" placeholder="Ej: Día de pecho" style="text-align:left;padding:0 12px;margin-top:6px"></div>'+
-  '<div class="card"><div class="mut">Ejercicios</div>'+(bd.items.length?bd.items.map((id,i)=>'<div class="set" style="grid-template-columns:1fr auto auto auto;margin-top:8px"><div><div style="font-weight:700">'+EX[id].n+'</div><div class="mut">'+EX[id].g+'</div></div><button class="tc" data-a="bup" data-i="'+i+'" aria-label="Subir">↑</button><button class="tc" data-a="bdn" data-i="'+i+'" aria-label="Bajar">↓</button><button class="tc" data-a="bdel" data-i="'+i+'" aria-label="Quitar">×</button></div>').join(""):'<div class="mut" style="margin:6px 0">Aún no agregas ejercicios.</div>')+
+  '<div class="card"><div class="mut">Ejercicios</div>'+(bd.items.length?bd.items.filter(id=>EX[id]).map((id,i)=>'<div class="set" style="grid-template-columns:1fr auto auto auto;margin-top:8px"><div><div style="font-weight:700">'+EX[id].n+'</div><div class="mut">'+EX[id].g+'</div></div><button class="tc" data-a="bup" data-i="'+i+'" aria-label="Subir">↑</button><button class="tc" data-a="bdn" data-i="'+i+'" aria-label="Bajar">↓</button><button class="tc" data-a="bdel" data-i="'+i+'" aria-label="Quitar">×</button></div>').join(""):'<div class="mut" style="margin:6px 0">Aún no agregas ejercicios.</div>')+
   '<div class="row" style="margin-top:12px"><select id="bx">'+gs+'</select><button class="btn g" style="flex:0 0 90px;padding:0" data-a="badd">Agregar</button></div><button class="btn g" style="margin-top:8px" data-a="newex">Crear ejercicio nuevo</button></div>'+
   (bd.err?'<div style="color:#f5a524;margin-bottom:8px">'+bd.err+'</div>':"")+'<button class="btn" data-a="bsave">Guardar rutina</button>'+(bd.id?'<button class="btn g" style="margin-top:8px;color:#ff6b5e" data-a="delr" data-k="'+bd.id+'">'+(cf==="d"+bd.id?"¿Seguro que quieres borrar esta rutina? Toca de nuevo":"Borrar rutina")+'</button>':'');
 }
@@ -1776,7 +1776,7 @@ function clickH(e){
   else if(a==="pick"){pick=b.dataset.k;psty=null;fatAdj=null;render()}
   else if(a==="fatadj"){fatAdj=fatAdj===pick?null:pick;render()}
   else if(a==="newr"){bd={id:null,n:"",items:[],err:""};render()}
-  else if(a==="editr"){const r=S.cr.find(x=>x.id===b.dataset.k);if(r){bd={id:r.id,n:r.n,items:r.items.slice(),err:""};render()}}
+  else if(a==="editr"){const r=S.cr.find(x=>x.id===b.dataset.k);if(r){bd={id:r.id,n:r.n,items:r.items.filter(i=>EX[i]),err:""};render()}}
   else if(a==="delr"){if(cf==="d"+b.dataset.k){cf=null;S.delr.push(b.dataset.k);S.cr=S.cr.filter(x=>x.id!==b.dataset.k);bd=null;regCustom();persist();render();window.scrollTo(0,0)}else{cf="d"+b.dataset.k;render()}}
   else if(a==="startc"){pick=b.dataset.k;more=false;{const st=styOf(pick);{const AW=pick==="adapt"?buildAdaptiveWorkout():null;adaptR=AW?AW.R:null;const its=(AW?AW.ids:FL(pick)).map(id=>mk(id,st));adaptR=null;S.sessions.push({id:Date.now(),d:iso(),rt:pick,rn:AW?"Adaptativo · "+AW.name:FN[pick],st,fin:false,items:its})};psty=null};persist();render();window.scrollTo(0,0)}
   else if(a==="badd"){const x=$("bx").value;if(x&&!bd.items.includes(x))bd.items.push(x);bd.err="";render()}
