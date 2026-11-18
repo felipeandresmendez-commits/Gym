@@ -125,6 +125,7 @@ nav button.ctr span,.mn button.ctr span{margin-top:-2px}
 .wrow{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--bd);color:var(--tx);font:inherit;font-size:15px;padding:12px 0}
 .bang{display:inline-block;margin-top:5px;color:var(--yel);font:700 14px var(--fd);letter-spacing:.06em;text-transform:uppercase}.bang small{font:500 12px var(--fb);color:var(--mut);text-transform:none;letter-spacing:0}
 .cdot{position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--blu)}
+.sdot{position:absolute;top:5px;left:5px;width:6px;height:6px;transform:rotate(45deg);border:1.5px solid var(--mut);box-sizing:border-box}.sdot.ok{background:var(--grn);border-color:var(--grn)}.day.sel .sdot{border-color:var(--on)}.day.sel .sdot.ok{background:var(--on)}
 table{width:100%;border-collapse:collapse;font-size:16px}td{padding:10px 2px;border-top:1px solid var(--bd)}
 .bar{display:flex;align-items:center;height:68px;margin:10px 0 4px;position:relative}
 .bar .shaft{position:absolute;left:0;right:0;top:30px;height:8px;background:#5a5a56;border-radius:2px}
@@ -649,7 +650,7 @@ function today(){
     const note=AW?'<div class="mut" style="margin:-2px 0 10px;line-height:1.4">'+AW.name+' · '+AW.why+(AW.blocked.length?' Ayer trabajaste '+AW.blocked.join(", ").toLowerCase()+': sin compuestos para eso hoy.':"")+'</div>'+(AW.fatigue?'<div class="pu" style="margin:0 0 10px">Día Extra: Volumen ajustado para recuperación</div>':""):SHD?'<div class="warn">Fatiga detectada en '+SHD.names.join(", ")+'. Usa "Adaptativo" o reduce el volumen de hoy.<button class="btn g sm" style="margin-top:8px" data-a="fatadj">'+(fa?"✓ Aplicado: −1 serie en fatigados (toca para deshacer)":"Aplicar -1 serie en fatigados")+'</button></div>':"";
     hero='<div class="card hero"><div class="big" style="margin:4px 0 8px">'+FN[pick]+'</div><div class="chips">'+(keys.includes(pick)?keys:[pick].concat(keys)).map(k=>'<button data-a="pick" data-k="'+k+'" class="'+(pick===k?"on":"")+'">'+(k[0]==="u"?FN[k]:(SH[k]||FN[k]))+'</button>').join("")+'</div>'+note+'<div class="mut" style="margin:-2px 0 10px">Día de '+STN[sty][0].toLowerCase()+' · <button class="lnk" data-a="tsty">'+(showSty?"Listo":"Cambiar")+'</button></div>'+(showSty?'<div class="rts" style="margin:0 0 6px">'+["f","h","m"].map(k=>'<button data-a="sty" data-k="'+k+'" class="'+(sty===k?"on":"")+'">'+STN[k][0]+'</button>').join("")+'</div><div class="mut" style="margin-bottom:10px">'+STN[sty][1]+'</div>':"")+FL(pick).map(id=>'<div style="display:flex;justify-content:space-between;padding:5px 0"><span>'+EX[id].n+(benchFor(id)?' <span class="mut" style="font-size:13px">· '+benchFor(id)[0]+'</span>':'')+'</span><span class="mut">'+nSets(id,sty)+' × '+rtxt(id,sty)+'</span></div>').join("")+'<button class="btn" style="margin-top:12px" data-a="start">Empezar entrenamiento</button></div>';adaptR=null;
     }
-    return bkRem()+tplans+hero+dyCard()+thisWeek()+cardioCard()+stepsCard()+coach(ad)+myCard();
+    return bkRem()+tplans+hero+dyCard()+thisWeek()+coach(ad)+myCard();
   }
   const RC=records(),tot=a.items.reduce((t,i)=>t+i.sets.length,0),dn=a.items.reduce((t,i)=>t+i.sets.filter(q=>q.ok).length,0);
   const curI=a.items.findIndex(it=>it.sets.some(q=>!q.ok));
@@ -676,17 +677,13 @@ let cvf=null,stEd=false;
 function cdSum(c){const x=CM[c.m]||{n:"Cardio"};const p=[c.min+" min"];if(c.km)p.push(fk(c.km)+" km");if(c.mt)p.push(c.mt+" m");if(c.inc)p.push(fk(c.inc)+"% incl.");if(c.vel)p.push(fk(c.vel)+" km/h");if(c.lvl)p.push("nivel "+c.lvl);if(c.cal)p.push(c.cal+" cal");return{n:x.n,t:p.join(" · "),i:CI[c.i]||""}}
 function cardioWeek(){const mon=new Date();mon.setDate(mon.getDate()-wd());const a=isoOf(mon);const L=(S.cardio||[]).filter(c=>c.d>=a&&c.d<=iso());return{n:L.length,min:L.reduce((t,c)=>t+(+c.min||0),0)}}
 const fmN=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,".");
-const stDay=n=>{const d=new Date();d.setDate(d.getDate()-n);return isoOf(d)};
-function stepsCard(){
-  const t=iso(),m=new Map((S.steps||[]).map(x=>[x.d,x.n])),g=S.stg||8000,td=m.get(t)||0;
-  const days=[6,5,4,3,2,1,0].map(n=>{const d=stDay(n);return{d,n:m.get(d)||0}}),mx=Math.max(g,...days.map(x=>x.n)),lg=days.filter(x=>x.n>0),avg=lg.length?Math.round(lg.reduce((a,x)=>a+x.n,0)/lg.length):0,WN=["D","L","M","X","J","V","S"];
+function stepsDay(d){
+  const m=new Map((S.steps||[]).map(x=>[x.d,x.n])),g=S.stg||8000,n=m.get(d)||0,w=[0,1,2,3,4,5,6].map(i=>{const e=new Date(d+"T12:00");e.setDate(e.getDate()-i);return m.get(isoOf(e))||0}).filter(x=>x>0),avg=w.length?Math.round(w.reduce((t,x)=>t+x,0)/w.length):0;
   return'<div class="card"><div class="eh" style="align-items:center"><div class="en">Pasos</div><button class="tc" data-a="stgoal">Meta '+fmN(g)+'</button></div>'+
   (stEd?'<div class="row" style="margin:8px 0"><input id="stg" inputmode="numeric" placeholder="Meta diaria, ej: 8000" style="text-align:left;padding:0 12px"><button class="btn g sm" style="flex:0 0 96px" data-a="stgsave">Guardar</button></div>':'')+
-  '<div class="mut" style="margin:2px 0 6px"><b style="color:var(--tx);font-size:22px">'+fmN(td)+'</b> hoy'+(td>=g?' · meta cumplida':td?' · faltan '+fmN(g-td):'')+(avg?' · promedio 7 días: '+fmN(avg):'')+'</div>'+
-  '<div style="height:8px;border-radius:4px;background:var(--rais2);overflow:hidden"><i style="display:block;height:100%;width:'+Math.min(100,Math.round(td/g*100))+'%;background:'+(td>=g?"var(--ok)":"var(--ac)")+'"></i></div>'+
-  '<div style="display:flex;gap:6px;align-items:flex-end;height:56px;margin:12px 0 4px">'+days.map(x=>'<div style="flex:1;height:100%;display:flex;align-items:flex-end" title="'+fmN(x.n)+'"><div style="width:100%;height:'+(x.n?Math.max(6,Math.round(x.n/mx*100)):0)+'%;border-radius:3px;background:'+(x.n>=g?"var(--ok)":"var(--ln)")+'"></div></div>').join("")+'</div>'+
-  '<div style="display:flex;gap:6px" class="mut">'+days.map(x=>'<span style="flex:1;text-align:center;font-size:11px">'+WN[new Date(x.d+"T12:00").getDay()]+'</span>').join("")+'</div>'+
-  '<div class="row" style="margin-top:12px;gap:6px"><select id="std" style="flex:0 0 96px"><option value="0">Hoy</option><option value="1">Ayer</option><option value="2">Anteayer</option></select><input id="sti" inputmode="numeric" placeholder="Ej: 8500" style="text-align:left;padding:0 12px"><button class="btn" style="flex:0 0 96px;padding:0" data-a="stsave">Guardar</button></div><div class="mut" style="margin-top:6px;font-size:12px">Para borrar un día, guarda 0.</div></div>';
+  '<div class="mut" style="margin:2px 0 6px"><b style="color:var(--tx);font-size:22px">'+fmN(n)+'</b> '+(d===iso()?"hoy":"este día")+(n>=g?' · meta cumplida':n?' · faltan '+fmN(g-n):'')+(avg?' · promedio 7 días: '+fmN(avg):'')+'</div>'+
+  '<div style="height:8px;border-radius:4px;background:var(--rais2);overflow:hidden"><i style="display:block;height:100%;width:'+Math.min(100,Math.round(n/g*100))+'%;background:'+(n>=g?"var(--ok)":"var(--ac)")+'"></i></div>'+
+  '<div class="row" style="margin-top:12px;gap:6px"><input id="sti" inputmode="numeric" placeholder="'+(n?fmN(n):"Ej: 8500")+'" style="text-align:left;padding:0 12px"><button class="btn" style="flex:0 0 110px;padding:0" data-a="stsave" data-d="'+d+'">Guardar</button></div><div class="mut" style="margin-top:6px;font-size:12px">Para borrar este día, guarda 0.</div></div>';
 }
 function cardioCard(){
   if(cvf)return cardioForm();
@@ -995,18 +992,18 @@ function calStats(){
 }
 function cal(){
   const y=cm.getFullYear(),m=cm.getMonth(),first=(new Date(y,m,1).getDay()+6)%7,n=new Date(y,m+1,0).getDate(),by={};
-  S.sessions.filter(s=>s.fin).forEach(s=>(by[s.d]=by[s.d]||[]).push(s));const pd={};(S.plan||[]).forEach(p=>pd[p.d]=1);const cdd={};(S.cardio||[]).forEach(c=>cdd[c.d]=1);
+  S.sessions.filter(s=>s.fin).forEach(s=>(by[s.d]=by[s.d]||[]).push(s));const pd={};(S.plan||[]).forEach(p=>pd[p.d]=1);const cdd={};(S.cardio||[]).forEach(c=>cdd[c.d]=1);const sdd={};(S.steps||[]).forEach(c=>sdd[c.d]=c.n);
   let g=["L","M","X","J","V","S","D"].map(d=>'<div class="mut" style="text-align:center">'+d+'</div>').join("");
   for(let i=0;i<first;i++)g+='<div></div>';
-  for(let d=1;d<=n;d++){const k=y+"-"+pad(m+1)+"-"+pad(d);g+='<button class="day'+(k===cs?" sel":"")+(k===iso()?" td":"")+'" data-a="day" data-d="'+k+'">'+d+(by[k]?'<i'+(pd[k]?' class="b2"':'')+'></i>':'')+(pd[k]?'<i class="p'+(by[k]?' b':'')+'"></i>':'')+(cdd[k]?'<b class="cdot"></b>':'')+'</button>'}
+  for(let d=1;d<=n;d++){const k=y+"-"+pad(m+1)+"-"+pad(d);g+='<button class="day'+(k===cs?" sel":"")+(k===iso()?" td":"")+'" data-a="day" data-d="'+k+'">'+d+(by[k]?'<i'+(pd[k]?' class="b2"':'')+'></i>':'')+(pd[k]?'<i class="p'+(by[k]?' b':'')+'"></i>':'')+(cdd[k]?'<b class="cdot"></b>':'')+(sdd[k]?'<b class="sdot'+(sdd[k]>=(S.stg||8000)?' ok':'')+'"></b>':'')+'</button>'}
   const ss=by[cs]||[];
   let h=calStats()+'<div class="card"><div class="eh" style="align-items:center"><button class="tc" data-a="mp">‹</button><div class="en">'+(t=>t[0].toUpperCase()+t.slice(1))(cm.toLocaleDateString("es-CL",{month:"long",year:"numeric"}))+'</div><button class="tc" data-a="mn">›</button></div><div class="cg">'+g+'</div></div>';
   h+='<div class="mut" style="text-align:center;margin:-4px 0 10px">'+Object.keys(by).filter(k=>k.startsWith(y+"-"+pad(m+1))).length+' días entrenados este mes</div>'+impCard()+'<div class="en" style="margin:4px 0 8px">'+fd(cs)+'</div>';
   const mp=(S.plan||[]).filter(p=>p.d===cs),cp=crewPlans(cs),cd=(S.cardio||[]).filter(c=>c.d===cs);
   const add='<button class="btn g sm" style="margin-bottom:14px" data-a="cvnew" data-d="'+cs+'">+ Registrar cardio este día</button>';
   if(cvf&&cvf.d===cs)return h+cardioForm();
-  if(!ss.length&&!mp.length&&!cp.length&&!cd.length)return h+'<div class="card mut">Sin entrenamiento este día.</div>'+add;
-  return h+mp.map(planCard).join("")+ss.map(sessCard).join("")+cd.map(cardioDay).join("")+cp.map(crewPlanCard).join("")+add;
+  if(!ss.length&&!mp.length&&!cp.length&&!cd.length)return h+'<div class="card mut">Sin entrenamiento este día.</div>'+add+stepsDay(cs);
+  return h+mp.map(planCard).join("")+ss.map(sessCard).join("")+cd.map(cardioDay).join("")+cp.map(crewPlanCard).join("")+add+stepsDay(cs);
 }
 const LBL={"Cuádriceps":["quads"],"Glúteos":["glutes"],"Pectoral":[["upper_pecs",.5],"middle_pecs","lower_pecs"],"Pectoral superior":["upper_pecs",["middle_pecs",.75],["lower_pecs",.5]],"Tríceps":["triceps"],"Hombro anterior":["front_delts"],"Hombros":["front_delts","side_delts"],"Hombro lateral":["side_delts"],"Hombro posterior":["rear_delts"],"Dorsales":["lats"],"Bíceps":["biceps"],"Abdomen":["upper_abs","lower_abs","obliques"],"Abdomen bajo":["lower_abs"],"Espalda media":["rhomboids","lower_traps"],"Espalda alta":["rhomboids","upper_traps"],"Trapecio":["upper_traps","lower_traps"],"Isquiotibiales":["hamstrings"],"Lumbar":["lower_back"],"Aductores":["hip_adductor"],"Glúteo medio":["hip_abductor"],"Abductores":["hip_abductor"],"Gemelos":["calves"],"Pecho":[["upper_pecs",.5],"middle_pecs","lower_pecs"],"Espalda":["lats","rhomboids"],"Piernas":["quads"],"Core":["upper_abs","lower_abs","obliques"]};
 const F2G={upper_pecs:"pec",middle_pecs:"pec",lower_pecs:"pec",front_delts:"del",side_delts:"del",rear_delts:"dpo",biceps:"bic",triceps:"tri",upper_abs:"abs",lower_abs:"abs",obliques:"abs",quads:"qua",hip_adductor:"add",hip_abductor:"abd",lats:"lat",rhomboids:"esp",upper_traps:"esp",lower_traps:"esp",lower_back:"lum",glutes:"glu",hamstrings:"ham",calves:"cal"};
@@ -1955,7 +1952,7 @@ function clickH(e){
     S.cardio.push(o);cvf=null;persist();render();toast("Cardio guardado: "+o.min+" min")}
   else if(a==="stgoal"){stEd=!stEd;render()}
   else if(a==="stgsave"){const v=parseInt(String($("stg").value).replace(/\D/g,""))||0;if(v>=1000&&v<=100000){S.stg=v;stEd=false;persist();render();toast("Meta: "+fmN(v)+" pasos")}else toast("Escribe una meta entre 1.000 y 100.000")}
-  else if(a==="stsave"){const raw=String($("sti").value).trim();if(!raw){toast("Escribe tus pasos");return}const v=Math.min(parseInt(raw.replace(/\D/g,""))||0,200000),d=stDay(+$("std").value);S.steps=S.steps.filter(x=>x.d!==d);
+  else if(a==="stsave"){const raw=String($("sti").value).trim();if(!raw){toast("Escribe tus pasos");return}const v=Math.min(parseInt(raw.replace(/\D/g,""))||0,200000),d=b.dataset.d||iso();S.steps=S.steps.filter(x=>x.d!==d);
     if(v>0){S.delst=S.delst.filter(x=>x!==d);S.steps.push({d,n:v,u:Date.now()});toast("Pasos guardados: "+fmN(v))}else{if(!S.delst.includes(d))S.delst.push(d);toast("Día borrado")}
     persist();render()}
   else if(a==="cvdel"){const id=+b.dataset.k;if(cf==="c"+id){cf=null;S.delc.push(id);S.cardio=S.cardio.filter(x=>x.id!==id);persist();render()}else{cf="c"+id;render()}}
