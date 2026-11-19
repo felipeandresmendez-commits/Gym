@@ -209,7 +209,6 @@ svg text{font-family:var(--fb)}
 .tr-w:not(.done) .tr-tag{font-size:28px;text-align:left}.tr-w:not(.done) .tr-sub{text-align:left;margin-top:-6px}
 .tr-c b{font-size:min(13vh,52px)}.tr-n{padding:6px}.tr-n b{font-size:30px}.tr-n span{font-size:11px}.tr-n i{min-height:0}
 #trot .btn{min-height:42px;padding:8px}#trot .btn.sm{min-height:38px}
-.tr-w:not(.done)>.tr-voz{display:none}
 .tr-w.done{max-width:520px}.tr-ok{font-size:56px}
 }
 </style>
@@ -225,7 +224,7 @@ svg text{font-family:var(--fb)}
 window.claude=window.claude||{use:async()=>null};
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 /* Aviso de versión nueva: compara esta versión con la publicada y ofrece actualizar sin cerrar la app */
-const APPV="gymlog-v15";
+const APPV="gymlog-v16";
 function updCheck(){try{fetch("sw.js",{cache:"no-store"}).then(r=>r.text()).then(t=>{const m=t.match(/const CACHE = "([^"]+)"/);if(m&&m[1]!==APPV&&!$("updbar")){const d=document.createElement("button");d.id="updbar";d.setAttribute("data-a","appupd");d.style.cssText="position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));z-index:50;max-width:520px;margin:0 auto;border:0;border-radius:12px;padding:14px;background:var(--blu);color:#fff;font:700 16px var(--fb);box-shadow:0 8px 24px rgba(0,0,0,.35)";d.textContent="Hay una versión nueva · Toca para actualizar";document.body.appendChild(d)}}).catch(()=>{})}catch(e){}}
 function appUpd(){const d=$("updbar");if(d)d.textContent="Actualizando…";const done=()=>location.reload();
   fetch("./index.html",{cache:"reload"}).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>caches.keys().then(ks=>Promise.all(ks.map(k=>caches.open(k).then(c=>Promise.all(["./","./index.html"].map(u=>c.put(u,new Response(b,{headers:{"Content-Type":"text/html; charset=utf-8"}}))))))))).then(()=>navigator.serviceWorker&&navigator.serviceWorker.getRegistration()).then(g=>g&&g.update()).catch(()=>{}).then(done,done)}
@@ -672,7 +671,7 @@ function openCfg(keep){cfgOpen=true;const n=S.sessions.filter(q=>q.fin).length;$
 function bkExport(){S.lastBk=iso();persist();const f="gym-log-"+iso()+".json",blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});try{const file=new File([blob],f,{type:"application/json"});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Copia de Gym Log"}).catch(()=>{});return}}catch(e){}const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=f;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast("Copia exportada")}
 function bkImport(rd){rd=rd&&rd.data&&Array.isArray(rd.data.sessions)?rd.data:rd;if(!rd||!Array.isArray(rd.sessions))throw new Error("El archivo no es una copia de Gym Log");const n0=S.sessions.length;if((S.mig||0)<(rd.mig||0)){const ids=MIGR.map(m=>m.id);S.cr=S.cr.filter(x=>!ids.includes(x.id));S.mig=rd.mig}mergeRemote(rd);if(rd.prof&&!S.prof)S.prof=rd.prof;if(rd.tw&&!S.tw)S.tw=rd.tw;legacyNames();fixBases();regCustom();migR();persist();closeTech();toast("Importado: "+(S.sessions.length-n0)+" entrenamientos nuevos");render()}
 function ajustes(){
-  return'<div class="card" style="margin-top:12px"><div class="en">Ajustes</div><div class="row" style="margin-top:10px"><button class="btn g sm" data-a="editprof">Cambiar objetivo</button>'+(dls?'<button class="btn g sm" data-a="exp">Exportar datos</button>':'')+'</div><div class="row" style="margin-top:8px"><button class="btn g sm" data-a="bkexp">Exportar copia</button><button class="btn g sm" data-a="bkimp">Importar copia</button></div><input type="file" id="bkf" accept=".json,application/json" hidden>'+(S.sessions.length?'<button class="btn g sm" style="margin-top:8px;color:var(--red)" data-a="wipe">'+(cf==="wipe"?"¿Seguro? Toca de nuevo":"Borrar historial de entrenamientos")+'</button>'+(cf==="wipe"?'<div class="mut" style="margin-top:6px">Se borrarán '+S.sessions.length+' entrenamientos. Tu objetivo, peso, medidas y rutinas se mantienen.</div>':''):'')+'<div class="mut" id="ex" style="margin-top:8px">Versión 19-nov (v15) · Estado: <span id="sy">'+(syncTxt||"conectando…")+'</span></div><div class="mut" style="margin-top:4px;font-size:11px">Ilustración del mapa muscular: Muscles-simplified.svg (Body-Heatmap-Repo). Exercise data by <a href="https://repdb.co" target="_blank" rel="noopener" style="color:inherit">RepDB (repdb.co)</a>.</div></div>';
+  return'<div class="card" style="margin-top:12px"><div class="en">Ajustes</div><div class="row" style="margin-top:10px"><button class="btn g sm" data-a="editprof">Cambiar objetivo</button>'+(dls?'<button class="btn g sm" data-a="exp">Exportar datos</button>':'')+'</div><div class="row" style="margin-top:8px"><button class="btn g sm" data-a="bkexp">Exportar copia</button><button class="btn g sm" data-a="bkimp">Importar copia</button></div><input type="file" id="bkf" accept=".json,application/json" hidden>'+(S.sessions.length?'<button class="btn g sm" style="margin-top:8px;color:var(--red)" data-a="wipe">'+(cf==="wipe"?"¿Seguro? Toca de nuevo":"Borrar historial de entrenamientos")+'</button>'+(cf==="wipe"?'<div class="mut" style="margin-top:6px">Se borrarán '+S.sessions.length+' entrenamientos. Tu objetivo, peso, medidas y rutinas se mantienen.</div>':''):'')+'<div class="mut" id="ex" style="margin-top:8px">Versión 19-nov (v16) · Estado: <span id="sy">'+(syncTxt||"conectando…")+'</span></div><div class="mut" style="margin-top:4px;font-size:11px">Ilustración del mapa muscular: Muscles-simplified.svg (Body-Heatmap-Repo). Exercise data by <a href="https://repdb.co" target="_blank" rel="noopener" style="color:inherit">RepDB (repdb.co)</a>.</div></div>';
 }
 function today(){
   if(ce)return exForm();
@@ -714,7 +713,7 @@ function today(){
     '<div class="row" style="margin-top:10px;gap:6px">'+'<button class="btn g sm" data-a="addset" data-i="'+i+'">+ Serie</button>'+(it.sets.length>1?'<button class="btn g sm" data-a="rmset" data-i="'+i+'">− Serie</button>':'')+'<button class="btn g sm" data-a="mex" data-i="'+i+'">'+(moreEx===i?"Menos":"Más")+'</button></div>'+
     (moreEx===i?'<div class="row" style="margin-top:6px;gap:6px">'+(it.sets.some(q=>q.ok)?'':'<button class="btn g sm" data-a="swap" data-i="'+i+'">Cambiar</button>')+'<button class="btn g sm" data-a="note" data-e="'+it.ex+'">Nota</button>'+(isPlt(it.ex)?'<button class="btn g sm" data-a="plates" data-e="'+it.ex+'" data-w="'+nxt.w+'">Discos</button>':'')+'<button class="btn g sm" data-a="rmex" data-i="'+i+'">Quitar</button></div>':'')+'</div>';
   });
-  return h+'<div class="card"><div class="en" style="font-size:17px;margin-bottom:8px">Agregar ejercicio</div><div class="row"><select id="ax" aria-label="Ejercicio">'+GR.map(g=>{const ks=Object.keys(EX).filter(k=>EX[k].g===g&&!a.items.some(it=>it.ex===k));return ks.length?'<optgroup label="'+g+'">'+ks.map(k=>'<option value="'+k+'">'+EX[k].n+'</option>').join("")+'</optgroup>':''}).join("")+'</select><button class="btn g" style="flex:0 0 96px;padding:0" data-a="addex">Agregar</button></div><button class="lnk" style="margin-top:10px" data-a="newex">¿No está? Crear ejercicio</button></div>'+trotCard(trotFor(a.items,title(a)))+'<button class="btn" data-a="fin">'+(cf==="fin"?"Quedan "+(tot-dn)+" sin marcar · Toca para terminar":"Terminar entrenamiento")+'</button><button class="btn g" style="margin-top:8px" data-a="cancel">'+(cf==="cancel"?"¿Seguro? Se borra esta sesión. Toca de nuevo":"Descartar sesión (la abrí por error)")+'</button>';
+  return h+'<div class="card"><div class="en" style="font-size:17px;margin-bottom:8px">Agregar ejercicio</div><div class="row"><select id="ax" aria-label="Ejercicio">'+GR.map(g=>{const ks=Object.keys(EX).filter(k=>EX[k].g===g&&!a.items.some(it=>it.ex===k));return ks.length?'<optgroup label="'+g+'">'+ks.map(k=>'<option value="'+k+'">'+EX[k].n+'</option>').join("")+'</optgroup>':''}).join("")+'</select><button class="btn g" style="flex:0 0 96px;padding:0" data-a="addex">Agregar</button></div><button class="lnk" style="margin-top:10px" data-a="newex">¿No está? Crear ejercicio</button></div>'+'<button class="btn" data-a="fin">'+(cf==="fin"?"Quedan "+(tot-dn)+" sin marcar · Toca para terminar":"Terminar entrenamiento")+'</button><button class="btn g" style="margin-top:8px" data-a="cancel">'+(cf==="cancel"?"¿Seguro? Se borra esta sesión. Toca de nuevo":"Descartar sesión (la abrí por error)")+'</button>';
 }
 const CM={trot:{n:"Trotadora",f:[["min","Minutos"],["km","Distancia (km)"],["inc","Inclinación (%)"],["vel","Velocidad (km/h)"]]},spin:{n:"Bici spinning",f:[["min","Minutos"],["km","Distancia (km)"],["lvl","Nivel de resistencia"]]},air:{n:"Air bike",f:[["min","Minutos"],["cal","Calorías (pantalla)"]]},remo:{n:"Remo",f:[["min","Minutos"],["mt","Metros"]]},walk:{n:"Caminata afuera",f:[["min","Minutos"],["km","Distancia (km)"]]}};
 const CI={s:"Suave",m:"Moderada",i:"Intensa"};
@@ -760,7 +759,7 @@ function trotPlan(r,k){
 }
 const TGUIDE='<details style="margin:10px 0"><summary class="lnk" style="cursor:pointer">¿Cuándo subir o bajar la intensidad?</summary><div style="line-height:1.6;margin-top:8px"><b>Termómetro de esfuerzo</b><br>Fácil (2–3 de 10): puedes cantar o hablar sin pausas.<br>Ideal (5–6): frases cortas, respiración marcada.<br>Fuerte (7): solo palabras sueltas. Únicamente en los tramos fuertes de los intervalos.<br><br><b>Súbela</b> si después de 5 min puedes hablar con frases largas: primero +1% de inclinación cada 2–3 min y después +0,2 km/h. No pases de 5,5 km/h ni corras.<br><b>Bájala</b> si no puedes decir una frase corta, respiras muy fuerte o necesitas agarrarte de las barras: primero −0,3 km/h y luego −2% de inclinación.<br><b>Detente</b> si sientes dolor en rodillas o espalda baja, o mareo.<br><br>Al terminar cuéntame cómo se sintió y ajusto la próxima vez.</div></details>';
 /* Trote guiado: pantalla completa con tiempo, cambios avisados por voz, pitidos y vibración */
-let TR=null,trI=null,trAC=null,trLastR=null;const TRK="gymTrot";
+let TR=null,TRP=null,trI=null,trAC=null,trLastR=null;const TRK="gymTrot";
 const trKey=r=>tvSel&&(tvSel===r.rec||r.alts.includes(tvSel))?tvSel:r.rec;
 const trCl=(x,a,b)=>Math.round(Math.max(a,Math.min(b,x))*10)/10;
 const mmss=ms=>{const t=Math.max(0,Math.ceil(ms/1000));return Math.floor(t/60)+":"+String(t%60).padStart(2,"0")};
@@ -776,21 +775,11 @@ const trTot=()=>TR.a.reduce((t,x)=>t+x.d,0)*1000;
 const trEl=()=>(TR.ps||Date.now())-TR.t0-TR.pz;
 function trPos(){let el=trEl(),i=0;for(;i<TR.a.length;i++){const d=TR.a[i].d*1000;if(el<d)break;el-=d}return i>=TR.a.length?{i:TR.a.length-1,se:TR.a[TR.a.length-1].d*1000,end:true}:{i,se:el}}
 function trVal(sg){const a=TR.adj[sg.c]||{inc:0,vel:0};return{inc:trCl(sg.inc+a.inc,0,15),vel:trCl(sg.vel+a.vel,3.5,5.5)}}
-const trSay=n=>String(fk(n)).replace(","," coma ");
 function trSave(){try{TR?localStorage.setItem(TRK,JSON.stringify(TR)):localStorage.removeItem(TRK)}catch(e){}}
 function trAudio(){try{if(!trAC){const C=window.AudioContext||window.webkitAudioContext;if(C)trAC=new C()}if(trAC&&trAC.state==="suspended")trAC.resume()}catch(e){}}
-function trBeep(f,ms,n){if(!TR||!TR.snd||!trAC)return;try{for(let k=0;k<(n||1);k++){const o=trAC.createOscillator(),g=trAC.createGain(),t=trAC.currentTime+k*(ms/1000+.12);o.frequency.value=f;o.connect(g);g.connect(trAC.destination);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.35,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+ms/1000);o.start(t);o.stop(t+ms/1000+.05)}}catch(e){}}
-function trVib(p){try{if(TR&&TR.snd&&navigator.vibrate)navigator.vibrate(p)}catch(e){}}
-function trSpeak(t){if(!TR||!TR.voz)return;try{const S2=window.speechSynthesis;if(!S2)return;S2.cancel();const u=new SpeechSynthesisUtterance(t),v=S2.getVoices().find(x=>/^es/i.test(x.lang));u.lang=v?v.lang:"es-ES";if(v)u.voice=v;u.rate=1.02;S2.speak(u)}catch(e){}}
-function trAnn(i){
-  const sg=TR.a[i],v=trVal(sg),pv=i>0?trVal(TR.a[i-1]):null,inc=trSay(v.inc)+" por ciento",vel=trSay(v.vel)+" kilómetros por hora";
-  let t;
-  if(sg.c==="hard")t=(sg.r===sg.rt?"Última ronda. ":"Ronda "+sg.r+" de "+sg.rt+". ")+"¡Fuerte! Sube a "+inc+", "+vel+".";
-  else if(sg.c==="easy"&&pv)t="Suave. Baja a "+inc+" y "+vel+". Recupera el aire.";
-  else if(sg.c==="cool")t="Enfriamiento. Baja a "+inc+" y paso suave.";
-  else t="Comenzamos. Inclinación "+inc+", "+vel+". Sin agarrarte de las barras.";
-  trBeep(i?880:660,220,2);trVib([180,90,180]);trSpeak(t);TR.flash=Date.now();
-}
+function trBeep(f,ms,n){if((TR&&!TR.snd)||!trAC)return;try{for(let k=0;k<(n||1);k++){const o=trAC.createOscillator(),g=trAC.createGain(),t=trAC.currentTime+k*(ms/1000+.12);o.frequency.value=f;o.connect(g);g.connect(trAC.destination);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.35,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+ms/1000);o.start(t);o.stop(t+ms/1000+.05)}}catch(e){}}
+function trVib(p){try{if((!TR||TR.snd)&&navigator.vibrate)navigator.vibrate(p)}catch(e){}}
+function trAnn(i){trBeep(i?880:660,220,2);trVib([180,90,180]);TR.flash=Date.now()}
 function trAdjust(dir){
   const p=trPos(),sg=TR.a[p.i],c=sg.c,a=TR.adj[c]=TR.adj[c]||{inc:0,vel:0},v=trVal(sg);let m;
   if(dir>0){
@@ -798,11 +787,11 @@ function trAdjust(dir){
     else{const cap=c==="hard"?15:14;if(v.inc<cap){a.inc+=1;m="Sube a "+fk(trVal(sg).inc)+"% de inclinación."}else if(v.vel<5.5){a.vel=Math.round((a.vel+.2)*10)/10;m="Sube a "+fk(trVal(sg).vel)+" km/h."}else m="Ya estás en el tope: mantén y concéntrate en la postura."}
   }else if(dir<0){if(v.vel>4){a.vel=Math.round((a.vel-.3)*10)/10;m="Baja a "+fk(trVal(sg).vel)+" km/h."}else{a.inc-=2;m="Baja a "+fk(trVal(sg).inc)+"% de inclinación."}}
   else m="¡Así! Mantén este ritmo.";
-  TR.ask=null;TR.msg={t:m,at:Date.now()};trBeep(dir>0?990:dir<0?520:760,160,1);trSpeak(m.replace(/%/g," por ciento").replace(/km\/h/g,"kilómetros por hora"));trSave();trDraw(true);
+  TR.ask=null;TR.msg={t:m,at:Date.now()};trBeep(dir>0?990:dir<0?520:760,160,1);trSave();trDraw(true);
 }
 function trStart(r,k){
   trAudio();const g=trSegs(r,k);
-  TR={k,n:g.p.n,i:g.p.i,a:g.a,t0:Date.now(),pz:0,ps:null,adj:{},cur:-1,chk:{},bp:"",ms:{},ask:null,msg:null,done:false,cid:null,snd:true,voz:true,hid:false,cf:false};
+  TR={k,n:g.p.n,i:g.p.i,a:g.a,t0:Date.now(),pz:0,ps:null,adj:{},cur:-1,chk:{},bp:"",ms:{},ask:null,msg:null,done:false,cid:null,snd:true,hid:false,cf:false};
   trSave();lock();trRun();
 }
 function trRun(){clearInterval(trI);trI=setInterval(trTick,250);trTick(true)}
@@ -815,12 +804,12 @@ function trTick(force){
     if(p.i!==TR.cur){TR.cur=p.i;TR.ask=null;trAnn(p.i);trSave();force=true}
     const sec=Math.ceil(left/1000);
     if(p.i<TR.a.length-1&&sec<=3&&sec>=1&&TR.bp!==p.i+"-"+sec){TR.bp=p.i+"-"+sec;trBeep(740,120,1)}
-    if(p.i<TR.a.length-1&&sec===10&&TR.bp!==p.i+"-10"){TR.bp=p.i+"-10";const nx=TR.a[p.i+1],nv=trVal(nx);trSpeak("En 10 segundos, "+nx.n.toLowerCase()+": "+trSay(nv.inc)+" por ciento.")}
-    (sg.chk||[]).forEach(t=>{if(p.se>=t*1000&&!TR.chk[p.i+"-"+t]){TR.chk[p.i+"-"+t]=1;TR.ask={at:Date.now()};trBeep(660,180,2);trVib([120,80,120]);trSpeak("¿Cómo vas? Revisa tu esfuerzo.");trSave();force=true}});
+    if(p.i<TR.a.length-1&&sec===10&&TR.bp!==p.i+"-10"){TR.bp=p.i+"-10";const nx=TR.a[p.i+1],nv=trVal(nx);}
+    (sg.chk||[]).forEach(t=>{if(p.se>=t*1000&&!TR.chk[p.i+"-"+t]){TR.chk[p.i+"-"+t]=1;TR.ask={at:Date.now()};trBeep(660,180,2);trVib([120,80,120]);trSave();force=true}});
     if(TR.ask&&Date.now()-TR.ask.at>25000){TR.ask=null;force=true}
     if(TR.msg&&Date.now()-TR.msg.at>6000){TR.msg=null;force=true}
-    if(!TR.ms.half&&el>=tot/2){TR.ms.half=1;if(!TR.ask)trSpeak("Vas en la mitad. ¡Muy bien!")}
-    if(!TR.ms.last&&tot-el<=60000&&tot>120000){TR.ms.last=1;trSpeak("Último minuto.")}
+    if(!TR.ms.half&&el>=tot/2){TR.ms.half=1;if(!TR.ask){TR.msg={t:"¡Vas en la mitad!",at:Date.now()};force=true}}
+    if(!TR.ms.last&&tot-el<=60000&&tot>120000){TR.ms.last=1;TR.msg={t:"Último minuto",at:Date.now()};trBeep(880,160,1);force=true}
   }
   trDraw(force);
 }
@@ -829,12 +818,27 @@ function trFinish(early){
   if(early&&el<60000){trClose();toast("Trote descartado");return}
   let nid=Date.now();while((S.cardio||[]).some(c=>c.id===nid))nid++;const hard=TR.a.find(x=>x.c==="hard"),main=hard||TR.a.find(x=>x.c==="base")||TR.a[0],v=trVal(main),o={id:nid,d:iso(),m:"trot",i:TR.i,min:Math.max(1,Math.round(Math.min(el,trTot())/60000)),inc:v.inc,vel:v.vel,v:TR.k};
   S.cardio=S.cardio||[];S.cardio.push(o);persist();TR.done=true;TR.cid=o.id;TR.ps=TR.ps||Date.now();TR.ask=null;TR.msg=null;
-  clearInterval(trI);trBeep(1040,260,3);trVib([200,100,200,100,300]);trSpeak(early?"Listo. Guardé "+o.min+" minutos.":"¡Listo! Cardio completo. Buen trabajo.");trSave();trDraw(true);render();
+  clearInterval(trI);trBeep(1040,260,3);trVib([200,100,200,100,300]);trSave();trDraw(true);render();
 }
-function trClose(){clearInterval(trI);TR=null;trSave();try{window.speechSynthesis&&speechSynthesis.cancel()}catch(e){}if(!act())unlock();const e=$("trot");if(e){e.className="";e.innerHTML=""}render()}
+function trClose(){clearInterval(trI);TR=null;trSave();if(!act())unlock();const e=$("trot");if(e){e.className="";e.innerHTML=""}render()}
 function trEnsure(){let e=$("trot");if(!e){e=document.createElement("div");e.id="trot";e.setAttribute("role","dialog");e.setAttribute("aria-label","Trote guiado");document.body.appendChild(e)}return e}
+function trPre(e){
+  const r=TRP.r,k=TRP.k,v=trotPlan(r,k),o=[r.rec].concat(r.alts),a0=trSegs(r,k).a[0];
+  e.className="on c-"+(k==="v2"?"easy":k==="v3"?"hard":"base");
+  if(TRP.cd){const n=Math.max(1,Math.ceil((TRP.cd-Date.now())/1000));
+    e.innerHTML='<div class="tr-w done"><div class="tr-sub" style="margin-top:8px">'+esc(v.n)+'</div><div class="tr-tag">Prepárate</div><div class="tr-ok tr-pop" style="color:var(--k);font-size:140px">'+n+'</div><div class="tr-msg">Súbete y pon la trotadora en '+fk(a0.inc)+'% y '+fk(a0.vel)+' km/h</div><button class="btn g" data-a="trcancel">Cancelar</button></div>';return}
+  e.innerHTML='<div class="tr-w done"><div class="tr-top"><button class="tc" data-a="trcancel">‹ Volver</button><span></span></div>'+
+  '<div class="tr-tag">'+esc(v.n)+'</div><div class="tr-sub">'+r.why+'</div>'+
+  (o.length>1?'<div class="chips" style="margin:0;padding:0;flex-wrap:wrap;justify-content:center;overflow:visible">'+o.map(x=>'<button data-a="trpick" data-k="'+x+'" class="'+(x===k?"on":"")+'">'+TVN[x]+'</button>').join("")+'</div>':'')+
+  '<div class="tr-msg" style="text-align:left;font-weight:400;line-height:1.6">'+v.t.map(x=>'• '+x).join("<br>")+'</div><div class="mut" style="text-align:center">'+v.o+'</div>'+
+  '<div class="note" style="margin:0">No te sujetes de las barras. Nada de sprints ni de correr después de las pesas.</div>'+TGUIDE+
+  '<div class="mut" style="text-align:center;font-size:13px">Te aviso con pitidos y vibración en cada cambio de tramo.</div>'+
+  '<button class="btn cardio" data-a="trbegin">▶ Empezar</button><button class="lnk" style="align-self:center" data-a="trlog">Ya lo hice: registrar sin cronómetro</button></div>';
+}
+function trBegin(){trAudio();TRP.cd=Date.now()+5000;TRP.last=0;clearInterval(trI);trI=setInterval(()=>{if(!TRP){clearInterval(trI);return}const left=TRP.cd-Date.now(),n=Math.ceil(left/1000);if(left<=0){const q=TRP;TRP=null;trStart(q.r,q.k);return}if(n!==TRP.last){TRP.last=n;trBeep(740,140,1);trVib(60);trDraw(true)}},100);trDraw(true)}
+function trCancel(){if(!TR){clearInterval(trI)}TRP=null;const e=trEnsure();e.className="";e.innerHTML="";render()}
 function trDraw(full){
-  const e=trEnsure();if(!TR||TR.hid){e.className="";return}
+  const e=trEnsure();if(!TR&&TRP)return trPre(e);if(!TR||TR.hid){e.className="";return}
   if(TR.done){const c=(S.cardio||[]).find(x=>x.id===TR.cid);e.className="on c-easy";
     e.innerHTML='<div class="tr-w done"><div class="tr-ok tr-pop">✓</div><div class="tr-tag">Cardio completo</div><div class="tr-sub">'+esc(TR.n)+(c?' · '+c.min+' min':'')+'</div><div class="tr-msg">Quedó guardado en tu calendario. ¿Cómo se sintió?</div><div class="tr-bt3">'+Object.keys(FEEL).map(x=>'<button class="btn sm '+(c&&c.f===x?"":"g")+'" data-a="trfeel" data-k="'+x+'">'+FEEL[x][0].toUpperCase()+FEEL[x].slice(1)+'</button>').join("")+'</div><div class="mut" style="text-align:center;font-size:13px">Con tu respuesta ajusto la inclinación de la próxima vez.</div><button class="btn" data-a="trclose">Cerrar</button></div>';return}
   const p=trPos(),sg=TR.a[p.i],v=trVal(sg),pv=p.i>0?trVal(TR.a[p.i-1]):null,left=sg.d*1000-p.se,tot=trTot(),el=trEl(),C=2*Math.PI*112,fr=p.se/(sg.d*1000);
@@ -854,8 +858,7 @@ function trDraw(full){
   (TR.msg?'<div class="tr-msg tr-pop">'+TR.msg.t+'</div>':'')+
   (TR.ask?'':'<div class="tr-bt"><button class="btn g sm" data-a="tradj" data-k="-1">Me cuesta mucho</button><button class="btn g sm" data-a="tradj" data-k="1">Está muy fácil</button></div>')+
   '<div class="tr-bt"><button class="btn" data-a="trpause">'+(TR.ps?"▶ Seguir":"❚❚ Pausa")+'</button><button class="btn g" data-a="trend">'+(TR.cf?"¿Terminar? Toca de nuevo":"Terminar")+'</button></div>'+
-  '<div class="mut tr-foot" style="text-align:center;font-size:12px">Sin agarrarte de las barras · Detente si sientes dolor o mareo</div>'+
-  '<button class="lnk tr-voz" style="align-self:center" data-a="trvoz">'+(TR.voz?"Silenciar voz":"Activar voz")+'</button></div>';
+  '<div class="mut tr-foot" style="text-align:center;font-size:12px">Sin agarrarte de las barras · Detente si sientes dolor o mareo</div>'+'</div>';
   const pr=e.querySelector("#trpr"),nx=TR.a[p.i+1];if(nx&&left<=10000&&!TR.ps){const nv=trVal(nx);pr.style.display="block";pr.textContent="En "+Math.ceil(left/1000)+" s: "+nx.n+" · "+fk(nv.inc)+"% y "+fk(nv.vel)+" km/h"}
 }
 try{const x=JSON.parse(localStorage.getItem(TRK)||"null");if(x&&x.a&&(x.done||Date.now()-x.t0<3*3600e3)){TR=x;TR.hid=false;if(!TR.done){trRun()}else setTimeout(()=>trDraw(true),0)}else localStorage.removeItem(TRK)}catch(e){}
@@ -2132,14 +2135,17 @@ function clickH(e){
   else if(a==="cvsave"){const min=num(cvf.v.min);if(!(min>0)){cvf.err="Escribe los minutos.";render();return}
     const o={id:Date.now(),d:cvf.d,m:cvf.m,i:cvf.i,min:Math.round(min)};CM[cvf.m].f.forEach(f=>{if(f[0]!=="min"){const v=num(cvf.v[f[0]]);if(v>0)o[f[0]]=Math.round(v*10)/10}});
     S.cardio.push(o);cvf=null;persist();render();toast("Cardio guardado: "+o.min+" min")}
-  else if(a==="trgo"){const r=act()?trotFor(act().items,title(act())):sumv&&sumv.tv?sumv.tv:trLastR;if(!r){toast("Abre una sesión para armar tu trote");return}trStart(r,b.dataset.k&&(b.dataset.k===r.rec||r.alts.includes(b.dataset.k))?b.dataset.k:trKey(r))}
+  else if(a==="trgo"){const r=act()?trotFor(act().items,title(act())):sumv&&sumv.tv?sumv.tv:trLastR;if(!r){toast("Abre una sesión para armar tu trote");return}{TRP={r,k:b.dataset.k&&(b.dataset.k===r.rec||r.alts.includes(b.dataset.k))?b.dataset.k:trKey(r)};trDraw(true)}}
+  else if(a==="trpick"){if(TRP&&!TRP.cd){TRP.k=b.dataset.k;tvSel=b.dataset.k;trDraw(true)}}
+  else if(a==="trbegin"){if(TRP&&!TRP.cd)trBegin()}
+  else if(a==="trcancel")trCancel();
+  else if(a==="trlog"){if(TRP){const v=trotPlan(TRP.r,TRP.k);let nid=Date.now();while(S.cardio.some(c=>c.id===nid))nid++;S.cardio.push({id:nid,d:iso(),m:"trot",i:v.i,min:v.min,inc:v.inc,vel:v.vel,v:TRP.k});persist();trCancel();toast("Cardio guardado: "+v.min+" min")}}
   else if(a==="trshow"){if(TR){trAudio();TR.hid=false;trDraw(true)}}
   else if(a==="trhide"){if(TR){TR.hid=true;trDraw(true);render()}}
-  else if(a==="trpause"){if(TR&&!TR.done){trAudio();if(TR.ps){TR.pz+=Date.now()-TR.ps;TR.ps=null;trSpeak("Seguimos.")}else{TR.ps=Date.now();trSpeak("Pausa.")}trSave();trDraw(true)}}
+  else if(a==="trpause"){if(TR&&!TR.done){trAudio();if(TR.ps){TR.pz+=Date.now()-TR.ps;TR.ps=null;}else{TR.ps=Date.now();}trSave();trDraw(true)}}
   else if(a==="trend"){if(TR){if(TR.cf){TR.cf=false;trFinish(true)}else{TR.cf=true;trDraw(true);setTimeout(()=>{if(TR&&TR.cf){TR.cf=false;trDraw(true)}},4000)}}}
   else if(a==="tradj"){if(TR&&!TR.done){trAudio();trAdjust(+b.dataset.k)}}
   else if(a==="trsnd"){if(TR){trAudio();TR.snd=!TR.snd;trSave();trDraw(true)}}
-  else if(a==="trvoz"){if(TR){TR.voz=!TR.voz;if(!TR.voz)try{speechSynthesis.cancel()}catch(e){}trSave();trDraw(true)}}
   else if(a==="trfeel"){const c=(S.cardio||[]).find(x=>TR&&x.id===TR.cid);if(c){c.f=b.dataset.k;persist();trDraw(true);render()}}
   else if(a==="trclose")trClose();
   else if(a==="appupd")appUpd();
